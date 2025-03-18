@@ -110,8 +110,8 @@ The system implements several security measures:
 ### 1. Clone this repository
 
 ```bash
-git clone https://github.com/yourusername/agent-pay-demo.git
-cd ai-payment-demo
+git clone https://github.com/ibnahmadcoded/agent-pay-demo.git
+cd agent-pay-demo
 ```
 
 ### 2. Setting up the Merchant Website (Next.js)
@@ -121,7 +121,7 @@ You can either use the provided dummy merchant site or create your own.
 #### Using the provided dummy merchant site:
 
 ```bash
-cd dummy_merchant
+cd dummy_merchant_site
 npm install
 npm run dev
 ```
