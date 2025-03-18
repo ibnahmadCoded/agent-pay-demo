@@ -6,7 +6,7 @@ This repository demonstrates an AI payment infrastructure that allows AI agents 
 2. **AI Payment Agent SDK**: A Python SDK for AI agents to make payments on merchant websites
 3. **Payment Gateway**: A backend service that mediates between merchants and AI agents
 
-## Payment Flow Diagram
+## Payment Flow Diagram For Agent <-> Merchant Site Payment Type
 
 ```
 ┌─────────────┐      1. Check compatibility      ┌─────────────┐
