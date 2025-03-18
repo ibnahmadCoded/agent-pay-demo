@@ -57,6 +57,8 @@ This repository demonstrates an AI payment infrastructure that allows AI agents 
 7. **Payment Completion**: The agent completes the payment through the payment gateway.
 8. **Completion Notification**: The payment gateway notifies the merchant site about payment completion (via webhook if provided).
 
+NOTE: this demo and process artifacts are for the Agent <-> Merchant Website payment type only. Other processes will be published on our official website. 
+
 ## Components Overview
 
 ### 1. Merchant Website (Next.js)
