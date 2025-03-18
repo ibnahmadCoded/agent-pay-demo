@@ -46,7 +46,7 @@ This repository demonstrates an AI payment infrastructure that allows AI agents 
                                             └─────────────┘
 ```
 
-## Payment Flow Process (Rough, not exact)
+## Payment Flow Process
 
 1. **Compatibility Check**: The AI agent checks if the merchant website is compatible with AI payments.
 2. **Merchant ID**: The merchant website returns its unique merchant ID to the AI agent.
