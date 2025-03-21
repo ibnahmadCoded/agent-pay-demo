@@ -18,7 +18,7 @@ export default function Home() {
     try {
       const publicKey = 'YOUR_PUBLIC_KEY';
       
-      const gateway = new MerchantPaymentClient('MERCHANT_123', publicKey, 'http://3.86.254.180');
+      const gateway = new MerchantPaymentClient('YOUR_MERCHANT_ID', publicKey, 'http://3.86.254.180');
       
       gateway.init();
       
