@@ -7,7 +7,7 @@ import asyncio
 
 app = Flask(__name__)
 
-agent_client = AgentPaymentClient(agent_id, TEST_PRIVATE_KEY, "http://localhost:8001/api")
+agent_client = AgentPaymentClient(agent_id, TEST_PRIVATE_KEY, "http://3.86.254.180/api")
 
 @app.route('/check-compatibility', methods=['POST'])
 async def check_compatibility():
@@ -46,6 +46,7 @@ async def initiate_payment():
             currency=data['currency'],
             description=data.get('description')
         )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

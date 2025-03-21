@@ -9,7 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "merchant-payment-client": "^0.1.1",
+    "lucide-react": "^0.483.0",
+    "merchant-payment-client": "^0.1.3",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

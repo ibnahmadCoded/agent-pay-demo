@@ -66,7 +66,6 @@ NOTE: this demo and process artifacts are for the Agent <-> Merchant Website pay
 The merchant website integrates the Merchant Payment Client SDK to accept payments from AI agents. It includes:
 - A basic UI for payment verification
 - A webhook endpoint for receiving payment notifications
-- Methods for initializing payments
 
 ### 2. AI Agent (Flask)
 
@@ -120,6 +119,17 @@ You can either use the provided dummy merchant site or create your own.
 
 #### Using the provided dummy merchant site:
 
+First, choose a Merchant ID for the demo. You can use any ID you want as this is a test environment.
+
+1. Open `page.tsx` and update the following line:
+```typescript
+const gateway = new MerchantPaymentClient('YOUR_MERCHANT_ID', publicKey, 'http://3.86.254.180');
+```
+Replace `'YOUR_MERCHANT_ID'` with your chosen merchant ID. Do not modify any other part of this line.
+
+> Note: The server is already live at the provided IP address, but you can use your own gateway if desired.
+
+2. Install dependencies and start the merchant site:
 ```bash
 cd dummy_merchant_site
 npm install
@@ -137,42 +147,7 @@ The merchant site uses Next.js and integrates the Merchant Payment Client SDK. T
    - Provides a form for payment verification
    - Displays payment verification results
 
-```typescript
-// Key parts of page.tsx
-const gateway = new MerchantPaymentClient('MERCHANT_123', publicKey, 'http://localhost:8001');
-gateway.init();
-
-// Set up event listeners
-gateway.onPaymentEvent((event) => {
-  console.log('Payment event received:', event);
-});
-```
-
-2. **webhook/payment/route.ts**: Handles payment notifications from the payment gateway:
-
-```typescript
-// Key parts of webhook handler
-export async function POST(request: NextRequest) {
-  try {
-    const notification = await request.json();
-    console.log('Received payment notification:', notification);
-    
-    if (notification.status === 'completed') {
-      console.log(`Payment ${notification.payment_id} completed with secret: ${notification.secret}`);
-    } else if (notification.status === 'initialized') {
-      console.log(`Payment ${notification.payment_id} initialized`);
-    }
-    
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Error processing webhook:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
+2. **webhook/payment/route.ts**: Handles payment notifications from the payment gateway
 
 ### 3. Setting up the AI Agent (Flask)
 
@@ -180,6 +155,13 @@ You can either use the provided dummy agent app or create your own.
 
 #### Using the provided dummy agent app:
 
+1. Open `config.py` and change the agent_id to any desired agent ID:
+```python
+# Edit only the agent_id; do not change any other configuration
+agent_id = "YOUR_AGENT_ID"
+```
+
+2. Install dependencies and start the agent app:
 ```bash
 cd dummy_agent_app
 pip install -r requirements.txt
@@ -189,80 +171,90 @@ python app.py
 
 The agent API will be available at `http://localhost:5000`.
 
-#### About the agent app code:
+### 4. Setting up ngrok for Webhook Support
 
-The Flask app simulates an AI agent and provides endpoints for:
+Before testing the payment flow, you need to expose your local services to the internet using ngrok. This is necessary because webhooks cannot be sent to localhost addresses for security reasons.
 
-1. **Checking website compatibility**:
-```python
-@app.route('/check-compatibility', methods=['POST'])
-async def check_compatibility():
-    website_url = request.json.get('url')
-    compatibility_result = await agent_client.check_website_compatibility(website_url)
-    is_compatible = compatibility_result['compatible']
-    return jsonify({"compatible": is_compatible})
+1. Download and install ngrok from [https://ngrok.com/download](https://ngrok.com/download)
+
+2. Create an ngrok configuration file (`ngrok.yml`):
+```yaml
+version: "3"
+agent:
+    authtoken: YOUR_TOKEN
+
+tunnels:
+    flask_app:
+        addr: 5000
+        proto: http
+    nextjs_app:
+        addr: 3000
+        proto: http
 ```
 
-2. **Initiating payments** (two methods):
-   - Using webhook for initialization notification
-   - Using polling for initialization status
-
-```python
-# With agent reference - polls for initialization status
-@app.route('/initiate-payment-agent-ref', methods=['POST'])
-async def initiate_payment_agent_ref():
-    # ... check compatibility and get merchant_id
-    
-    # Generate unique reference
-    agent_payment_reference = str(object=uuid.uuid4())
-    
-    # Initiate payment
-    await agent_client.initiate_payment(
-        merchant_id=merchant_id,
-        amount=data['amount'],
-        currency=data['currency'],
-        agent_payment_reference=agent_payment_reference,
-        description=data.get('description')
-    )
-    
-    # Wait briefly then check status
-    await asyncio.sleep(1.5)
-    initialization_status = await agent_client.check_initialization_status(
-        agent_payment_reference=agent_payment_reference
-    )
-    
-    # Complete payment if initialized
-    if initialization_status["status"] == "success":
-        success = await agent_client.complete_payment(
-            merchant_id=merchant_id,
-            payment_id=initialization_status["payment_id"],
-            encrypted_advice=initialization_status["encrypted_advice"],
-            secret=initialization_status["secret"]
-        )
-        return jsonify({"success": success})
+3. Start ngrok tunnels:
+```bash
+ngrok start --all
 ```
 
-3. **Webhook endpoint** for receiving initialization notifications:
-```python
-@app.route('/webhook/payment', methods=['POST'])
-async def payment_webhook():
-    data = request.json
-    
-    if data['status'] == 'initialized':
-        # Complete the payment
-        success = await agent_client.complete_payment(
-            merchant_id=data['merchant_id'],
-            payment_id=data['payment_id'],
-            encrypted_advice=data['encrypted_advice'],
-            secret=data['secret']
-        )
-        return jsonify({"success": success})
-    return jsonify({"success": True})
+4. Note down the generated ngrok URLs for both services.
+
+### 5. Configuring Webhooks
+
+Once both services are running and exposed via ngrok, you need to configure the webhooks:
+
+#### For the Agent Webhook:
+
+Using Postman or curl, send a POST request to:
+```
+http://3.86.254.180/api/payments/webhooks/configure
+```
+
+With the following payload:
+```json
+{
+    "entity_id": "YOUR_AGENT_ID",
+    "entity_type": "agent",
+    "webhook_url": "YOUR_NGROK_URL_FOR_FLASK/webhook/payment"
+}
+```
+
+Add the header:
+```
+Authorization: Bearer YOUR_PUBLIC_KEY
+```
+
+#### For the Merchant Webhook:
+
+Send another POST request to the same endpoint:
+```
+http://3.86.254.180/api/payments/webhooks/configure
+```
+
+With the following payload:
+```json
+{
+    "entity_id": "YOUR_MERCHANT_ID",
+    "entity_type": "merchant",
+    "webhook_url": "YOUR_NGROK_URL_FOR_NEXTJS/api/webhook/payment"
+}
+```
+
+With the same header:
+```
+Authorization: Bearer YOUR_PUBLIC_KEY
+```
+
+For both requests, you should receive a response:
+```json
+{
+    "status": "configured"
+}
 ```
 
 ## Testing the Payment Flow
 
-Once both the merchant site and agent app are running, you can test the payment flow using Postman or curl.
+Once both the merchant site and agent app are running and the webhooks are configured, you can test the payment flow using Postman or curl.
 
 ### 1. Check Website Compatibility
 
@@ -396,6 +388,7 @@ curl -X POST http://localhost:3000/api/verify \
 
 - Use HTTPS for all communication in production environments
 - Validate SSL certificates to prevent man-in-the-middle attacks
+- Heads up, the test environment using http for transport
 
 ### Data Validation
 
