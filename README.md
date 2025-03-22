@@ -416,7 +416,7 @@ Be among the first to use our infrastructure. Join the [waitlist](https://tally.
 
 ## Community
 
-Join our community on [Discord](https://discord.gg/6C3uwQb8) and follow us on LinkedIn and X. Feel free to contribute and raise issues.
+Join our community on [Discord](https://discord.gg/6C3uwQb8) and follow us on [LinkedIn](https://www.linkedin.com/company/placidpay) and [X](https://x.com/aaalege). Feel free to contribute and raise issues on any of the open sourced repositories.
 
 ## License
 
