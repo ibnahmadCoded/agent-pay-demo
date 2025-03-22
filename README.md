@@ -1,4 +1,5 @@
 # AI Payment System Demo
+TLDR; you can watch a simple demo [here](https://www.loom.com/share/442e5130d3f8445b95022361bd4a97ca?sid=73e10f05-af07-408b-92ab-e31f032d41eb). Please frogive the bad sound. I am working with what I have at the moment. thank you. 
 
 This repository demonstrates an AI payment infrastructure that allows AI agents to make payments on merchant websites. The system consists of three main components:
 
